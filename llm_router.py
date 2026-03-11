@@ -34,8 +34,10 @@ class LLMRouter:
             self.models["anthropic"] = llm.bind_tools(self.tools)
 
         if os.getenv("GROQ_API_KEY"):
-            llm = ChatGroq(model_name="llama3-70b-8192", temperature=0)
+            llm = ChatGroq(model_name="llama-3.3-70b-versatile", temperature=0)
             self.models["llama"] = llm.bind_tools(self.tools)
+
+
 
         # Map tool names to functions for execution
         self.tool_map = {t.name: t for t in self.tools}
