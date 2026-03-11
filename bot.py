@@ -48,21 +48,28 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Just talk to me naturally! Tell me what you want to automate or ask.")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Echo the user message. We will replace this with AI routing later."""
+    """Route user messages to the AI agent."""
     if not is_authorized(update):
         return
         
     text = update.message.text
-    logger.info(f"Received message: {text}")
+    user_id = str(update.effective_user.id)
+    logger.info(f"Received message from {user_id}: {text}")
     
-    # Initialize router (lazy initialization would be better in production, but fine for testing)
+    # Initialize router once (could be moved to application startup for efficiency)
     llm = LLMRouter()
     
     # Send a "typing..." action to Telegram so the user knows the AI is thinking
     await context.bot.send_chat_action(chat_id=update.effective_chat.id, action='typing')
     
-    # For now, default to OpenAI, but we'll add routing logic later
-    response = llm.process_message(text, provider="openai")
+    # Pick the first available provider automatically
+    provider = "openai"
+    if not os.getenv("OPENAI_API_KEY") and os.getenv("ANTHROPIC_API_KEY"):
+        provider = "anthropic"
+    elif not os.getenv("OPENAI_API_KEY") and os.getenv("GROQ_API_KEY"):
+        provider = "llama"
+    
+    response = llm.process_message(text, user_id=user_id, provider=provider)
     
     await update.message.reply_text(response)
 
