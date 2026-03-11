@@ -14,3 +14,4 @@ langchain-community>=0.2.0
 langchain-experimental>=0.0.59
 requests>=2.31.0
 pytz>=2024.1
+ddgs>=9.0.0
