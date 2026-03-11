@@ -62,12 +62,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Send a "typing..." action to Telegram so the user knows the AI is thinking
     await context.bot.send_chat_action(chat_id=update.effective_chat.id, action='typing')
     
-    # Pick the first available provider automatically
-    provider = "openai"
-    if not os.getenv("OPENAI_API_KEY") and os.getenv("ANTHROPIC_API_KEY"):
-        provider = "anthropic"
-    elif not os.getenv("OPENAI_API_KEY") and os.getenv("GROQ_API_KEY"):
+    # Pick the best available provider (Groq is free, prefer it)
+    if os.getenv("GROQ_API_KEY"):
         provider = "llama"
+    elif os.getenv("ANTHROPIC_API_KEY"):
+        provider = "anthropic"
+    else:
+        provider = "openai"
     
     response = llm.process_message(text, user_id=user_id, provider=provider)
     
